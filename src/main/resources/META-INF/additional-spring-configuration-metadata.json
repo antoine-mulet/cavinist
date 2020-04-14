@@ -1,0 +1,44 @@
+{
+  "properties": [
+    {
+      "name": "db.name",
+      "type": "java.lang.String",
+      "description": "Postgres database name."
+    },
+    {
+      "name": "db.server",
+      "type": "java.lang.String",
+      "description": "Postgres database server."
+    },
+    {
+      "name": "db.schema",
+      "type": "java.lang.String",
+      "description": "Schema to be used in the context of this app."
+    },
+    {
+      "name": "db.url",
+      "type": "java.lang.String",
+      "description": "Url to access db schema."
+    },
+    {
+      "name": "db.master-user",
+      "type": "java.lang.String",
+      "description": "DB master user."
+    },
+    {
+      "name": "db.master-password",
+      "type": "java.lang.String",
+      "description": "DB master password."
+    },
+    {
+      "name": "db.app-user",
+      "type": "java.lang.String",
+      "description": "DB app user."
+    },
+    {
+      "name": "db.app-password",
+      "type": "java.lang.String",
+      "description": "DB app password."
+    }
+  ]
+}
