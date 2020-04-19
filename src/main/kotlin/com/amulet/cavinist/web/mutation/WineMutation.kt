@@ -1,16 +1,16 @@
 package com.amulet.cavinist.web.mutation
 
-import com.amulet.cavinist.service.*
-import com.amulet.cavinist.web.data.*
+import com.amulet.cavinist.web.context.ServiceContext
+import com.amulet.cavinist.web.data.input.WineInput
+import com.amulet.cavinist.web.data.output.WineOutput
 import com.expediagroup.graphql.spring.operations.Mutation
 import org.springframework.stereotype.Component
 
 @Component
-class WineMutation(val wineService: WineService, val chateauService: ChateauService) : Mutation {
+object WineMutation : Mutation {
 
-    suspend fun createWine(name: String, year: Int, chateauInput: ChateauInput): Wine? {
-        val chateau = chateauService.createChateau(chateauInput.name, chateauInput.region)
-        val wine = chateau?.id?.let { wineService.createWine(name, year, it) }
-        return wine?.let { Wine(it.id, it.name, it.year, it.chateauId) }
+    suspend fun createWine(context: ServiceContext, wineInput: WineInput): WineOutput? {
+        val wine = context.wineService.createWine(wineInput)
+        return wine?.let { WineOutput(it) }
     }
 }

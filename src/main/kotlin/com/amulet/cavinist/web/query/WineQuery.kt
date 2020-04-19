@@ -1,20 +1,21 @@
 package com.amulet.cavinist.web.query
 
-import com.amulet.cavinist.service.WineService
-import com.amulet.cavinist.web.data.Wine
+import com.amulet.cavinist.web.context.ServiceContext
+import com.amulet.cavinist.web.data.output.WineOutput
 import com.expediagroup.graphql.spring.operations.Query
+import graphql.schema.DataFetchingEnvironment
 import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
-class WineQuery(val wineService: WineService) : Query {
+object WineQuery : Query {
 
-    suspend fun getWine(id: UUID): Wine? {
-        val maybeWine = wineService.getWine(id)
-        return maybeWine?.let { Wine(it.id, it.name, it.year, it.chateauId) }
+    suspend fun getWine(context: ServiceContext, id: UUID): WineOutput? {
+        val maybeWine = context.wineService.getWine(id)
+        return maybeWine?.let { WineOutput(it) }
     }
 
-    suspend fun listWines(): List<Wine> {
-        return wineService.listWines().map { Wine(it.id, it.name, it.year, it.chateauId) }
+    suspend fun listWines(context: ServiceContext): List<WineOutput> {
+        return context.wineService.listWines().map { WineOutput(it) }
     }
 }

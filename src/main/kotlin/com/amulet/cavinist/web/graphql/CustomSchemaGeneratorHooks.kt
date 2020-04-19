@@ -1,4 +1,4 @@
-package com.amulet.cavinist.web.hooks
+package com.amulet.cavinist.web.graphql
 
 import com.expediagroup.graphql.hooks.SchemaGeneratorHooks
 import graphql.language.StringValue
@@ -27,9 +27,8 @@ internal val graphqlUUIDType = GraphQLScalarType.newScalar()
     .build()
 
 private object UUIDCoercing : Coercing<UUID, String> {
-    override fun parseValue(input: Any?): UUID = UUID.fromString(
-        serialize(
-            input))
+
+    override fun parseValue(input: Any?): UUID = UUID.fromString(serialize(input))
 
     override fun parseLiteral(input: Any?): UUID? {
         val uuidString = (input as? StringValue)?.value
