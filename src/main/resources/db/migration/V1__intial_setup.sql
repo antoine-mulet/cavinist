@@ -26,12 +26,20 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA ${app-schema} GRANT EXECUTE ON FUNCTIONS TO $
 -- Cavinist Database schema
 --
 
+create table users
+(
+    id       uuid primary key,
+    login    varchar(50)  not null,
+    password varchar(100) not null,
+    unique (login)
+);
+
 create table regions
 (
     id      uuid primary key,
     name    varchar(100) not null,
     country varchar(80)  not null,
-    version bigint       ,
+    version bigint,
     unique (name, country)
 );
 

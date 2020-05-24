@@ -1,6 +1,6 @@
 package com.amulet.cavinist.web.mutation
 
-import com.amulet.cavinist.persistence.data.WineType
+import com.amulet.cavinist.persistence.data.wine.WineType
 import com.amulet.cavinist.web.common.WordSpecWebIT
 import com.amulet.cavinist.web.graphql.ErrorCode
 
@@ -105,8 +105,8 @@ class WineMutationIT : WordSpecWebIT() {
                           }
                         }""".trimIndent())
                     .verifyError(
-                        "Wine with name 'Le Sang du Calvaire', type 'RED', winery id '${dataSet.cazeneuveWinery.id}' and region id '${dataSet.picSaintLoupRegion.id}' already exists.",
-                        ErrorCode.OBJECT_ALREADY_EXISTS)
+                        ErrorCode.OBJECT_ALREADY_EXISTS,
+                        "Wine with name 'Le Sang du Calvaire', type 'RED', winery id '${dataSet.cazeneuveWinery.id}' and region id '${dataSet.picSaintLoupRegion.id}' already exists.")
             }
 
             "fail when referencing a non existing winery" {
@@ -130,8 +130,8 @@ class WineMutationIT : WordSpecWebIT() {
                           }
                         }""".trimIndent())
                     .verifyError(
-                        "Winery with id '39240e9f-ae09-4e95-9fd0-a712035c8ad8' not found.",
-                        ErrorCode.OBJECT_NOT_FOUND)
+                        ErrorCode.OBJECT_NOT_FOUND,
+                        "Winery with id '39240e9f-ae09-4e95-9fd0-a712035c8ad8' not found.")
             }
         }
     }

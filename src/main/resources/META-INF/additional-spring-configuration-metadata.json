@@ -39,6 +39,31 @@
       "name": "db.app-password",
       "type": "java.lang.String",
       "description": "DB app password."
+    },
+    {
+      "name": "security.password.iterations",
+      "type": "java.lang.Integer",
+      "description": "Argon 2 iterations."
+    },
+    {
+      "name": "security.password.pepper",
+      "type": "java.lang.String",
+      "description": "Pepper for hashing."
+    },
+    {
+      "name": "security.jwt.issuer",
+      "type": "java.lang.String",
+      "description": "JWT issuer."
+    },
+    {
+      "name": "security.jwt.secret",
+      "type": "java.lang.String",
+      "description": "JWT signing key."
+    },
+    {
+      "name": "security.jwt.validity",
+      "type": "java.lang.Integer",
+      "description": "JWT validity in seconds."
     }
   ]
 }

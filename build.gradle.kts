@@ -2,7 +2,7 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val springBootVersion = "2.3.0.RC1"
+    val springBootVersion = "2.3.0.RELEASE"
     val kotlinVersion = "1.3.71"
     id("org.springframework.boot") version springBootVersion
     kotlin("jvm") version kotlinVersion
@@ -21,21 +21,29 @@ the<DependencyManagementExtension>().apply {
 
 group = "com.amulet"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
     maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-val graphqlVersion = "2.1.0"
-val kotestVersion = "4.0.4"
-val mockkVersion = "1.9.3"
+val graphqlVersion = "2.1.1"
+val bouncyCastleVersion = "1.65"
+val passayVersion = "1.6.0"
+val jjwtVersion = "0.11.1"
+
+val kotestVersion = "4.0.5"
+val mockkVersion = "1.10.0"
+val springMockkVersion = "2.0.1"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.springframework.security:spring-security-core")
+    implementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.passay:passay:$passayVersion")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.flywaydb:flyway-core")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -44,9 +52,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("com.expediagroup:graphql-kotlin-schema-generator:$graphqlVersion")
     implementation("com.expediagroup:graphql-kotlin-spring-server:$graphqlVersion")
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
     runtimeOnly("io.r2dbc:r2dbc-postgresql")
     runtimeOnly("org.postgresql:postgresql")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
         exclude(module = "mockito-core")
@@ -56,6 +67,7 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
     testImplementation("io.kotest:kotest-extensions-spring:$kotestVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("com.ninja-squad:springmockk:$springMockkVersion")
 }
 
 kapt {
@@ -92,6 +104,6 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         // We need the following compiler arg so null-safety taken into account in Kotlin types inferred from Spring API
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }

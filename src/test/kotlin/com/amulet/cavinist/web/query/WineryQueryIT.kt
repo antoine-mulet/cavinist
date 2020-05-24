@@ -16,7 +16,7 @@ class WineryQueryIT : WordSpecWebIT() {
                 { id: UUID -> """query { $getWineryQuery(id: "$id") {id, version, name, region { id, version, name, country } } }""" }
 
             "return the correct winery" {
-                testQuery(getWineryQuery, query(dataSet.petrusWinery.id)).verifyData(
+                testQuery(getWineryQuery, query(dataSet.petrusWinery.ID)).verifyData(
                     "id" to dataSet.petrusWinery.id.toString(),
                     "version" to dataSet.petrusWinery.version(),
                     "name" to dataSet.petrusWinery.name,

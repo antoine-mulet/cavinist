@@ -15,7 +15,7 @@ class RegionQueryIT : WordSpecWebIT() {
             val query = { id: UUID -> """query { $getRegionQuery(id: "$id") {id, version, name, country } }""" }
 
             "return the correct region" {
-                testQuery(getRegionQuery, query(dataSet.languedocRegion.id)).verifyData(
+                testQuery(getRegionQuery, query(dataSet.languedocRegion.ID)).verifyData(
                     "id" to dataSet.languedocRegion.id.toString(),
                     "version" to dataSet.languedocRegion.version(),
                     "name" to dataSet.languedocRegion.name,

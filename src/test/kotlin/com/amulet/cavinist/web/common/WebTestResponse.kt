@@ -1,6 +1,7 @@
 package com.amulet.cavinist.web.common
 
 import com.amulet.cavinist.web.graphql.ErrorCode
+import org.hamcrest.Matcher
 import org.springframework.test.web.reactive.server.WebTestClient
 
 const val DATA_JSON_PATH = "$.data"
@@ -19,18 +20,22 @@ data class WebTestResponse(val query: String, val response: WebTestClient.Respon
             .doesNotExist()
     }
 
-    fun verifyError(expectedErrorMessage: String, expectedCode: ErrorCode): WebTestClient.BodyContentSpec {
-        return response.expectStatus().isOk.expectBody()
-            .jsonPath("$ERRORS_JSON_PATH[0].message")
-            .isEqualTo(expectedErrorMessage)
+    fun verifyError(expectedCode: ErrorCode, expectedErrorMessage: String? = null): WebTestClient.BodyContentSpec {
+        val r = response.expectStatus().isOk.expectBody()
             .jsonPath("$ERRORS_JSON_PATH[0].extensions.code")
             .isEqualTo(expectedCode.name)
+        return if (expectedErrorMessage != null)
+            r.jsonPath("$ERRORS_JSON_PATH[0].message").isEqualTo(expectedErrorMessage)
+        else r
     }
 
     fun verifyData(vararg assertions: Pair<String, Any>) {
         val response = verifyOnlyDataExists()
         assertions.forEach { (path, expected) ->
-            response.jsonPath("$DATA_JSON_PATH.$query.$path").isEqualTo(expected)
+            when (expected) {
+                is String     -> response.jsonPath("$DATA_JSON_PATH.$query.$path").isEqualTo(expected)
+                is Matcher<*> -> response.jsonPath("$DATA_JSON_PATH.$query.$path").value(expected)
+            }
         }
     }
 

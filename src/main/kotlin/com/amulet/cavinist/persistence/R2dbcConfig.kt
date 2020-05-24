@@ -1,6 +1,6 @@
 package com.amulet.cavinist.persistence
 
-import com.amulet.cavinist.persistence.data.*
+import com.amulet.cavinist.persistence.data.wine.*
 import io.r2dbc.spi.ConnectionFactory
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
@@ -31,7 +31,9 @@ class R2dbcConfig : AbstractR2dbcConfiguration() {
 
     @Bean
     override fun r2dbcCustomConversions(): R2dbcCustomConversions {
-        val converterList = listOf(WineTypeToIntegerConverter, IntegerToWineTypeConverter)
+        val converterList = listOf(
+            WineTypeToIntegerConverter,
+            IntegerToWineTypeConverter)
         return R2dbcCustomConversions(storeConversions, converterList)
     }
 }

@@ -3,7 +3,7 @@ package com.amulet.cavinist.persistence.repository
 import com.amulet.cavinist.persistence.data.Entity
 import org.springframework.dao.*
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
-import reactor.core.publisher.*
+import reactor.core.publisher.Mono
 import java.util.UUID
 
 abstract class CrudRepository<T : Entity> {
@@ -17,12 +17,10 @@ abstract class CrudRepository<T : Entity> {
                     is DataIntegrityViolationException   ->
                         DataIntegrityViolationException("${entity.description()} already exists.")
                     is OptimisticLockingFailureException ->
-                        OutdatedVersionException("Failed to update region with id '${entity.id}' because version is outdated.")
+                        OutdatedVersionException("Failed to update ${entity.name()} with id '${entity.id}' because version is outdated.")
                     else                                 -> it
                 }
             }
 
     fun findById(id: UUID): Mono<T> = crudRepository.findById(id)
-
-    fun findAll(): Flux<T> = crudRepository.findAll()
 }

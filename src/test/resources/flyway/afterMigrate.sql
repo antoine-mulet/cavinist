@@ -1,3 +1,6 @@
+insert into users(id, login, password)
+values ('eb7d367f-d0a6-4906-8584-43bc8b9f5cad', 'the-chosen-one', '$argon2id$v=19$m=32768,t=5,p=2$jAvGXLy52MdC3L9JP523Hg$XbUUJZCfgVb7SNI7WHDon5UBrmLgwY1OO/SsXLeIXfs'); -- plain text password: Th!sIs@Saf3PwdToHash
+
 insert into regions(id, name, country, version)
 values ('2e744843-bf6a-4914-80fd-a802b5a952cb', 'Pomerol', 'France', 0);
 

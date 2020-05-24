@@ -1,6 +1,6 @@
 package com.amulet.cavinist.persistence
 
-import com.amulet.cavinist.persistence.data.*
+import com.amulet.cavinist.persistence.data.wine.*
 import io.r2dbc.spi.Row
 import java.util.UUID
 

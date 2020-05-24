@@ -6,9 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.regex.Pattern
 
 @AutoConfigureWebTestClient
 abstract class WordSpecWebIT : WordSpecIT() {
+
+    companion object Companion {
+        val uuidPattern = Pattern.compile("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}")
+    }
 
     @Autowired protected lateinit var testClient: WebTestClient
 

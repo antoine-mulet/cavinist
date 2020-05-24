@@ -1,15 +1,15 @@
 package com.amulet.cavinist.persistence.data
 
+import org.springframework.data.domain.Persistable
 import java.util.UUID
 
-abstract class Entity {
+abstract class Entity : Persistable<UUID> {
 
-    abstract val id: UUID
+    abstract val ID: UUID
 
-    protected abstract var version: Int? // Must be a var - see https://github.com/spring-projects/spring-data-r2dbc/issues/365
+    fun name(): String = this.javaClass.simpleName.dropLast(6) // dropping 'Entity' at the end
 
     abstract fun description(): String
 
-    fun version(): Int = version ?: 0
-
+    override fun getId(): UUID? = ID
 }

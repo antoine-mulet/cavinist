@@ -27,7 +27,7 @@ class WineQueryIT : WordSpecWebIT() {
             }
 
             "return the correct wine" {
-                testQuery(getWineQuery, query(dataSet.petrusWine.id)).verifyData(
+                testQuery(getWineQuery, query(dataSet.petrusWine.ID)).verifyData(
                     "id" to dataSet.petrusWine.id.toString(),
                     "version" to dataSet.petrusWine.version(),
                     "name" to dataSet.petrusWine.name,

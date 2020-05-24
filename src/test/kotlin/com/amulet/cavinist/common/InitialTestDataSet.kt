@@ -1,15 +1,22 @@
 package com.amulet.cavinist.common
 
-import com.amulet.cavinist.persistence.data.*
-import com.amulet.cavinist.persistence.repository.*
+import com.amulet.cavinist.persistence.data.user.UserEntity
+import com.amulet.cavinist.persistence.data.wine.*
+import com.amulet.cavinist.persistence.repository.user.UserRepository
+import com.amulet.cavinist.persistence.repository.wine.*
 import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
 class InitialTestDataSet(
+    userRepository: UserRepository,
     wineRepository: WineRepository,
     wineryRepository: WineryRepository,
     regionRepository: RegionRepository) {
+
+    val theChosenOne: UserEntity by lazy {
+        userRepository.findById(UUID.fromString("eb7d367f-d0a6-4906-8584-43bc8b9f5cad")).block()!!
+    }
 
     val pomerolRegion: RegionEntity by lazy {
         regionRepository.findById(UUID.fromString("2e744843-bf6a-4914-80fd-a802b5a952cb")).block()!!
@@ -28,9 +35,17 @@ class InitialTestDataSet(
             .block()!!
     }
 
+    val petrusWineryWithDependencies: WineryWithDependencies by lazy {
+        WineryWithDependencies(petrusWinery.ID, petrusWinery.version(), petrusWinery.name, pomerolRegion)
+    }
+
     val cazeneuveWinery: WineryEntity by lazy {
         wineryRepository.findById(UUID.fromString("39240e9f-ae09-4e95-9fd0-a712035c8ad7"))
             .block()!!
+    }
+
+    val cazeneuveWineryWithDependencies: WineryWithDependencies by lazy {
+        WineryWithDependencies(cazeneuveWinery.ID, cazeneuveWinery.version(), cazeneuveWinery.name, languedocRegion)
     }
 
     val petrusWine: WineEntity by lazy {
