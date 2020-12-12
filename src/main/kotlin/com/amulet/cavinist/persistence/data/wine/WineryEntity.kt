@@ -10,7 +10,8 @@ data class WineryEntity(
     @Id @Column("id") override val ID: UUID,
     @Version @Column("version") override val version: Int?,
     @Column("name") val name: String,
-    @Column("region_id") val regionId: UUID) : VersionedEntity() {
+    @Column("region_id") val regionId: UUID,
+    @Column("user_id") val userId: UUID) : VersionedEntity() {
 
     override fun description(): String = "Winery with name '$name', region id '$regionId'"
 }

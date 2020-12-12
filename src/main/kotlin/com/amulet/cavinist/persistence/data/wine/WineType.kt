@@ -4,27 +4,17 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.*
 
 enum class WineType {
-    RED, WHITE, SPARKLING, ROSE, OTHER;
+    RED, WHITE, ROSE, SPARKLING, OTHER;
 }
 
 @WritingConverter
-object WineTypeToIntegerConverter : Converter<WineType, Int> {
+object WineTypeToIntConverter : Converter<WineType, Int> {
 
-    override fun convert(myEnum: WineType): Int {
-        return myEnum.ordinal
-    }
+    override fun convert(myEnum: WineType): Int = myEnum.ordinal
 }
 
 @ReadingConverter
-object IntegerToWineTypeConverter : Converter<Int, WineType> {
+object IntToWineTypeConverter : Converter<Int, WineType> {
 
-    override fun convert(source: Int): WineType? {
-        return when (source) {
-            0    -> WineType.RED
-            1    -> WineType.WHITE
-            2    -> WineType.SPARKLING
-            3    -> WineType.ROSE
-            else -> WineType.OTHER
-        }
-    }
+    override fun convert(source: Int): WineType? = WineType.values()[source]
 }

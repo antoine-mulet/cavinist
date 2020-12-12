@@ -11,7 +11,8 @@ data class RegionEntity(
     @Id @Column("id") override val ID: UUID,
     @Version @Column("version") override val version: Int?,
     @Column("name") val name: String,
-    @Column("country") val country: String) : VersionedEntity() {
+    @Column("country") val country: String,
+    @Column("user_id") val userId: UUID) : VersionedEntity() {
 
     override fun description(): String = "Region with name '$name', country '$country'"
 }

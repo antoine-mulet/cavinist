@@ -39,8 +39,9 @@ create table regions
     id      uuid primary key,
     name    varchar(100) not null,
     country varchar(80)  not null,
+    user_id uuid references users,
     version bigint,
-    unique (name, country)
+    unique (name, country, user_id)
 );
 
 create table wineries
@@ -48,8 +49,9 @@ create table wineries
     id        uuid primary key,
     name      varchar(255)            not null,
     region_id uuid references regions not null,
-    version   int                     not null default 0,
-    unique (name, region_id)
+    user_id   uuid references users,
+    version   bigint                  not null,
+    unique (name, region_id, user_id)
 );
 
 create table wines
@@ -59,6 +61,7 @@ create table wines
     type      int                      not null,
     winery_id uuid references wineries not null,
     region_id uuid references regions  not null,
-    version   int                      not null default 0,
-    unique (name, type, winery_id, region_id)
+    user_id   uuid references users,
+    version   bigint                   not null,
+    unique (name, type, winery_id, region_id, user_id)
 );

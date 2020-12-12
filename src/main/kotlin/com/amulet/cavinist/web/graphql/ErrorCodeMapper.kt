@@ -10,13 +10,14 @@ import org.springframework.dao.DataIntegrityViolationException
 object ErrorCodeMapper {
 
     fun errorCodeForException(exception: Throwable): ErrorCode? = when (exception) {
-        is InvalidInputDataException       -> ErrorCode.INVALID_INPUT_DATA
-        is AuthenticationFailureException  -> ErrorCode.AUTH_FAILURE
-        is LoginPolicyFailureException     -> ErrorCode.LOGIN_POLICY_FAILURE
-        is PasswordPolicyFailureException  -> ErrorCode.PASSWORD_POLICY_FAILURE
-        is ObjectNotFoundException         -> ErrorCode.OBJECT_NOT_FOUND
-        is DataIntegrityViolationException -> ErrorCode.OBJECT_ALREADY_EXISTS
-        is OutdatedVersionException        -> ErrorCode.OUTDATED_VERSION
-        else                               -> null
+        is InvalidInputDataException               -> ErrorCode.INVALID_INPUT_DATA
+        is AuthenticationFailureException          -> ErrorCode.AUTH_FAILURE
+        is InvalidOrMissingAuthenticationException -> ErrorCode.AUTH_FAILURE
+        is LoginPolicyFailureException             -> ErrorCode.LOGIN_POLICY_FAILURE
+        is PasswordPolicyFailureException          -> ErrorCode.PASSWORD_POLICY_FAILURE
+        is ObjectNotFoundException                 -> ErrorCode.OBJECT_NOT_FOUND
+        is DataIntegrityViolationException         -> ErrorCode.OBJECT_ALREADY_EXISTS
+        is OutdatedVersionException                -> ErrorCode.OUTDATED_VERSION
+        else                                       -> null
     }
 }

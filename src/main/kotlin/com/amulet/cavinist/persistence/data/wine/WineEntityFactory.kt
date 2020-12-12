@@ -5,22 +5,22 @@ import java.util.UUID
 
 interface WineEntityFactory {
 
-    fun newRegion(name: String, country: String): RegionEntity
+    fun newRegion(name: String, country: String, userId: UUID): RegionEntity
 
-    fun newWinery(name: String, regionId: UUID): WineryEntity
+    fun newWinery(name: String, regionId: UUID, userId: UUID): WineryEntity
 
-    fun newWine(name: String, type: WineType, wineryId: UUID, regionId: UUID): WineEntity
+    fun newWine(name: String, type: WineType, wineryId: UUID, regionId: UUID, userId: UUID): WineEntity
 }
 
 @Component
 object WineEntityFactoryImpl : WineEntityFactory {
 
-    override fun newRegion(name: String, country: String): RegionEntity =
-        RegionEntity(UUID.randomUUID(), null, name, country)
+    override fun newRegion(name: String, country: String, userId: UUID): RegionEntity =
+        RegionEntity(UUID.randomUUID(), null, name, country, userId)
 
-    override fun newWinery(name: String, regionId: UUID): WineryEntity =
-        WineryEntity(UUID.randomUUID(), null, name, regionId)
+    override fun newWinery(name: String, regionId: UUID, userId: UUID): WineryEntity =
+        WineryEntity(UUID.randomUUID(), null, name, regionId, userId)
 
-    override fun newWine(name: String, type: WineType, wineryId: UUID, regionId: UUID): WineEntity =
-        WineEntity(UUID.randomUUID(), null, name, type, wineryId, regionId)
+    override fun newWine(name: String, type: WineType, wineryId: UUID, regionId: UUID, userId: UUID): WineEntity =
+        WineEntity(UUID.randomUUID(), null, name, type, wineryId, regionId, userId)
 }

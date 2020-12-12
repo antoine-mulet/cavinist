@@ -1,15 +1,18 @@
 package com.amulet.cavinist.service.wine
 
-import com.amulet.cavinist.persistence.data.wine.RegionEntity
+import com.amulet.cavinist.persistence.data.wine.*
 import com.amulet.cavinist.persistence.repository.wine.RegionRepository
-import kotlinx.coroutines.reactive.*
 import org.springframework.stereotype.Service
+import reactor.core.publisher.*
 import java.util.UUID
 
 @Service
-class RegionService(val repository: RegionRepository) {
+class RegionService(val repository: RegionRepository, val entityFactory: WineEntityFactory) {
 
-    suspend fun getRegion(id: UUID): RegionEntity? = repository.findById(id).awaitFirstOrNull()
+    fun getRegion(id: UUID, userId: UUID): Mono<RegionEntity> = repository.findForUser(id, userId)
 
-    suspend fun listRegions(): List<RegionEntity> = repository.findAll().collectList().awaitSingle()
+    fun listRegions(userId: UUID): Flux<RegionEntity> = repository.findAllForUser(userId)
+
+    fun createRegion(newRegion: NewRegion, userId: UUID): Mono<RegionEntity> =
+        repository.save(entityFactory.newRegion(newRegion.name, newRegion.country, userId))
 }

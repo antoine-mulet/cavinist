@@ -33,7 +33,8 @@ class WineMutationIT : WordSpecWebIT() {
                                 id, name, country, version
                              }
                           }
-                        }""".trimIndent())
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
                     .verifyData(
                         "version" to 0,
                         "name" to "A l'ombre du Figuier",
@@ -67,7 +68,8 @@ class WineMutationIT : WordSpecWebIT() {
                                 id, name, country, version
                              }
                           }
-                        }""".trimIndent())
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
                     .verifyData(
                         "version" to 0,
                         "name" to "Le Sang du Calvaire",
@@ -95,15 +97,9 @@ class WineMutationIT : WordSpecWebIT() {
                               wineryInput: { id: "${dataSet.cazeneuveWinery.id}" }
                               regionInput: { id: "${dataSet.picSaintLoupRegion.id}" }
                             }
-                          ) { id, version, name, type, winery {
-                                id, version, name, region {
-                                    id, name, country, version
-                                }
-                             }, region {
-                                id, name, country, version
-                             }
-                          }
-                        }""".trimIndent())
+                          ) { id }
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
                     .verifyError(
                         ErrorCode.OBJECT_ALREADY_EXISTS,
                         "Wine with name 'Le Sang du Calvaire', type 'RED', winery id '${dataSet.cazeneuveWinery.id}' and region id '${dataSet.picSaintLoupRegion.id}' already exists.")
@@ -120,18 +116,50 @@ class WineMutationIT : WordSpecWebIT() {
                               wineryInput: { id: "39240e9f-ae09-4e95-9fd0-a712035c8ad8" }
                               regionInput: { name: "Should not be saved", country: "fake" }
                             }
-                          ) { id, version, name, type, winery {
-                                id, version, name, region {
-                                    id, name, country, version
-                                }
-                             }, region {
-                                id, name, country, version
-                             }
-                          }
-                        }""".trimIndent())
+                          ) { id }
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
                     .verifyError(
-                        ErrorCode.OBJECT_NOT_FOUND,
-                        "Winery with id '39240e9f-ae09-4e95-9fd0-a712035c8ad8' not found.")
+                        ErrorCode.OBJECT_NOT_FOUND, "Winery with id '39240e9f-ae09-4e95-9fd0-a712035c8ad8' not found.")
+            }
+
+            "fail when providing incorrect polymorphic inputs" {
+
+                val regionExpectedMessage =
+                    "`id` only is required for an existing region, `name` and `country` are required to create a new region."
+                val wineryExpectedMessage =
+                    "`id` only is required for an existing winery, `name` and `regionInput` are required to create a new winery."
+
+                testQuery(
+                    createWineMutation,
+                    """mutation {
+                          $createWineMutation(
+                            wineInput: {
+                              name: "Fake One"
+                              type: RED
+                              wineryInput: { id: "39240e9f-ae09-4e95-9fd0-a712035c8ad8" }
+                              regionInput: { id: "39240e9f-ae09-4e95-9fd0-a712035c8ad8", name: "Should not be saved" }
+                            }
+                          ) { id }
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
+                    .verifyError(ErrorCode.INVALID_INPUT_DATA, regionExpectedMessage)
+
+                testQuery(
+                    createWineMutation,
+                    """mutation {
+                          $createWineMutation(
+                            wineInput: {
+                              name: "Fake One"
+                              type: RED
+                              wineryInput: { id: "39240e9f-ae09-4e95-9fd0-a712035c8ad8", name: "Should not be saved" }
+                              regionInput: { id: "39240e9f-ae09-4e95-9fd0-a712035c8ad8" }
+                            }
+                          ) { id }
+                        }""".trimIndent(),
+                    dataSet.userOneJwt)
+                    .verifyError(ErrorCode.INVALID_INPUT_DATA, wineryExpectedMessage)
+
             }
         }
     }

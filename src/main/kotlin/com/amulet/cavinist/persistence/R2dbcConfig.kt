@@ -18,22 +18,15 @@ class R2dbcConfig : AbstractR2dbcConfiguration() {
     @Qualifier("connectionFactory")
     lateinit var connectionFactory: ConnectionFactory
 
-    override fun connectionFactory(): ConnectionFactory {
-        return connectionFactory
-    }
+    override fun connectionFactory(): ConnectionFactory = connectionFactory
 
     @Bean
     fun transactionManager(
         @Qualifier("connectionFactory")
-        connectionFactory: ConnectionFactory): ReactiveTransactionManager? {
-        return R2dbcTransactionManager(connectionFactory)
-    }
+        connectionFactory: ConnectionFactory
+                          ): ReactiveTransactionManager? = R2dbcTransactionManager(connectionFactory)
 
     @Bean
-    override fun r2dbcCustomConversions(): R2dbcCustomConversions {
-        val converterList = listOf(
-            WineTypeToIntegerConverter,
-            IntegerToWineTypeConverter)
-        return R2dbcCustomConversions(storeConversions, converterList)
-    }
+    override fun r2dbcCustomConversions(): R2dbcCustomConversions =
+        R2dbcCustomConversions(storeConversions, listOf(WineTypeToIntConverter, IntToWineTypeConverter))
 }

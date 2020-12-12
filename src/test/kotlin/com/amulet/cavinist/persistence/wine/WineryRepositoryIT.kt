@@ -19,19 +19,23 @@ class WineryRepositoryIT : WordSpecIT() {
 
     init {
 
-        "findById" should {
+        "findForUser" should {
             "return the correct winery when it exists" {
-                repository.findById(dataSet.cazeneuveWinery.ID).block() shouldBe dataSet.cazeneuveWinery
+                repository.findForUser(dataSet.cazeneuveWinery.ID, dataSet.userOneId).block() shouldBe dataSet.cazeneuveWinery
             }
 
-            "return null when the winery doesn't exists" {
-                repository.findById(UUID.randomUUID()).block() shouldBe null
+            "return null when the winery doesn't exists for the user" {
+                repository.findForUser(dataSet.cazeneuveWinery.ID, dataSet.userTwoId).block() shouldBe null
+            }
+
+            "return null when the winery doesn't exists at all" {
+                repository.findForUser(UUID.randomUUID(), dataSet.userTwoId).block() shouldBe null
             }
         }
 
-        "findAllWithDependencies" should {
+        "findAllForUser" should {
             "return the correct wineries" {
-                val res: List<WineryWithDependencies> = repository.findAllWithDependencies().collectList().block()!!
+                val res: List<WineryWithDependencies> = repository.findAllForUser(dataSet.userOneId).collectList().block()!!
                 res should haveSize(2)
                 res should containAll(dataSet.petrusWineryWithDependencies, dataSet.cazeneuveWineryWithDependencies)
             }
@@ -39,7 +43,7 @@ class WineryRepositoryIT : WordSpecIT() {
 
         "save" should {
             "save a new winery" {
-                val newWinery = WineryEntity(UUID.randomUUID(), null, "New Winery", dataSet.languedocRegion.ID)
+                val newWinery = WineryEntity(UUID.randomUUID(), null, "New Winery", dataSet.languedocRegion.ID, dataSet.userOneId)
                 val res = repository.save(newWinery).block()!!
                 repository.findById(res.ID).block() shouldBe newWinery.copy(version = 0)
             }

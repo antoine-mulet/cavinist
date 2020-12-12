@@ -19,19 +19,23 @@ class RegionRepositoryIT : WordSpecIT() {
 
     init {
 
-        "findById" should {
+        "findForUser" should {
             "return the correct region when it exists" {
-                repository.findById(dataSet.languedocRegion.ID).block() shouldBe dataSet.languedocRegion
+                repository.findForUser(dataSet.languedocRegion.ID, dataSet.userOneId).block() shouldBe dataSet.languedocRegion
             }
 
-            "return null when the region doesn't exists" {
-                repository.findById(UUID.randomUUID()).block() shouldBe null
+            "return null when the region doesn't exists for the user" {
+                repository.findForUser(dataSet.languedocRegion.ID, dataSet.userTwoId).block() shouldBe null
+            }
+
+            "return null when the region doesn't exists at all" {
+                repository.findForUser(UUID.randomUUID(), dataSet.userTwoId).block() shouldBe null
             }
         }
 
-        "findAll" should {
+        "findAllForUser" should {
             "return the correct regions" {
-                val res = repository.findAll().collectList().block()!!
+                val res = repository.findAllForUser(dataSet.userOneId).collectList().block()!!
                 res should haveSize(3)
                 res should containAll(dataSet.pomerolRegion, dataSet.picSaintLoupRegion, dataSet.languedocRegion)
             }
@@ -39,7 +43,7 @@ class RegionRepositoryIT : WordSpecIT() {
 
         "save" should {
             "save a new region" {
-                val newRegion = RegionEntity(UUID.randomUUID(), null, "New region", "New country")
+                val newRegion = RegionEntity(UUID.randomUUID(), null, "New region", "New country", dataSet.userOneId)
                 val res = repository.save(newRegion).block()!!
                 repository.findById(res.ID).block() shouldBe newRegion.copy(version = 0)
             }

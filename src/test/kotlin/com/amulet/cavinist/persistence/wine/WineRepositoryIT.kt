@@ -19,19 +19,24 @@ class WineRepositoryIT : WordSpecIT() {
 
     init {
 
-        "findById" should {
+        "findForUser" should {
             "return the correct wine when it exists" {
-                repository.findById(dataSet.petrusWine.ID).block() shouldBe dataSet.petrusWine
+                repository.findForUser(dataSet.petrusWine.ID, dataSet.userOneId).block() shouldBe dataSet.petrusWine
             }
 
-            "return null when the wine doesn't exists" {
-                repository.findById(UUID.randomUUID()).block() shouldBe null
+            "return null when the wine doesn't exists for the user" {
+                repository.findForUser(dataSet.petrusWine.ID, dataSet.userTwoId).block() shouldBe null
+            }
+
+            "return null when the wine doesn't exists at all" {
+                repository.findForUser(UUID.randomUUID(), dataSet.userTwoId).block() shouldBe null
             }
         }
 
-        "findAllWithDependencies" should {
+        "findAllForUser" should {
             "return the correct wines" {
-                val res: List<WineWithDependencies> = repository.findAllWithDependencies().collectList().block()!!
+                val res: List<WineWithDependencies> =
+                    repository.findAllForUser(dataSet.userOneId).collectList().block()!!
                 res should haveSize(3)
                 val petrusWine = WineWithDependencies(
                     dataSet.petrusWine.ID,
@@ -66,7 +71,8 @@ class WineRepositoryIT : WordSpecIT() {
                     "Cazeneuve",
                     WineType.ROSE,
                     dataSet.cazeneuveWinery.ID,
-                    dataSet.languedocRegion.ID)
+                    dataSet.languedocRegion.ID,
+                    dataSet.userOneId)
                 val res = repository.save(newWine).block()!!
                 repository.findById(res.ID).block() shouldBe newWine.copy(version = 0)
             }

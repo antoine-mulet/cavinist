@@ -1,75 +1,56 @@
 package com.amulet.cavinist.service.wine
 
 import com.amulet.cavinist.persistence.data.wine.*
-import com.amulet.cavinist.persistence.repository.wine.*
+import com.amulet.cavinist.persistence.repository.wine.WineRepository
 import com.amulet.cavinist.service.*
-import com.amulet.cavinist.web.data.input.wine.*
-import kotlinx.coroutines.reactive.*
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
+import reactor.core.publisher.*
 import java.util.UUID
 
 @Service
 class WineService(
     val wineRepository: WineRepository,
-    val wineryRepository: WineryRepository,
-    val regionRepository: RegionRepository,
+    val wineryService: WineryService,
+    val regionService: RegionService,
     val entityFactory: WineEntityFactory,
     val txManager: TxManager) {
 
-    suspend fun getWine(id: UUID): WineEntity? = wineRepository.findById(id).awaitFirstOrNull()
+    fun getWine(id: UUID, userId: UUID): Mono<WineEntity> = wineRepository.findForUser(id, userId)
 
-    suspend fun listWines(): List<WineWithDependencies> =
-        wineRepository.findAllWithDependencies().collectList().awaitSingle()
+    fun listWines(userId: UUID): Flux<WineWithDependencies> = wineRepository.findAllForUser(userId)
 
-    suspend fun createWine(wineInput: WineInput): WineEntity? {
-        return createWineWithDependencies(
-            wineInput.name,
-            wineInput.type,
-            wineInput.wineryInput.toWineryInput(),
-            wineInput.regionInput.toRegionInput()).awaitFirstOrNull()
-    }
+    fun createWine(newWine: NewWine, userId: UUID): Mono<WineEntity> =
+        txManager.newTx(createWineInternal(newWine, userId))
 
-    protected fun createWineWithDependencies(
-        wineName: String,
-        wineType: WineType,
-        wineryInput: WineryInput,
-        wineRegionInput: RegionInput): Mono<WineEntity> {
+    private fun createWineInternal(newWine: NewWine, userId: UUID): Mono<WineEntity> {
 
-        val wineRegion = when (wineRegionInput) {
-            is NewRegionInput      -> regionRepository.save(
-                entityFactory.newRegion(wineRegionInput.name, wineRegionInput.country))
-            is ExistingRegionInput -> regionRepository.findById(wineRegionInput.id)
-                .switchIfEmpty(Mono.error(ObjectNotFoundException("Wine region with id '${wineRegionInput.id}' not found.")))
-        }.cache() // we need to cache the value in case it is used twice in the following code to make sure we only save once
-
-        val winery = when (wineryInput) {
-            is NewWineryInput      -> {
-                val wineryRegion = when (val wineryRegionInput = wineryInput.regionInput) {
-                    is NewRegionInput      ->
-                        if (wineryRegionInput != wineRegionInput)
-                            regionRepository.save(
-                                entityFactory.newRegion(wineryRegionInput.name, wineryRegionInput.country))
-                        else wineRegion // wine and winery have the same region so we only save it once
-                    is ExistingRegionInput -> regionRepository.findById(wineryRegionInput.id)
-                        .switchIfEmpty(Mono.error(
-                            ObjectNotFoundException(
-                                "Winery region with id '${wineryRegionInput.id}' not found.")))
-                }
-                wineryRegion.flatMap {
-                    wineryRepository.save(entityFactory.newWinery(wineryInput.name, it.ID))
-                }
-            }
-            is ExistingWineryInput -> wineryRepository.findById(wineryInput.id)
-                .switchIfEmpty(Mono.error(ObjectNotFoundException("Winery with id '${wineryInput.id}' not found.")))
+        val winery = when (val w = newWine.winery) {
+            is NewWinery      -> wineryService.createWinery(w, userId)
+            is ExistingWinery -> wineryService.getWinery(w.id, userId)
+                .switchIfEmpty(Mono.error(ObjectNotFoundException("Winery with id '${w.id}' not found.")))
         }
 
-        return txManager.newTx(
-            wineRegion.flatMap { region ->
+        // If both the wine and the winery regions are the same then we must ensure it is only saved once
+        val saveWineRegion = when (val newWinery = newWine.winery) {
+            is NewWinery -> newWinery.region != newWine.region
+            else         -> true
+        }
+
+        if (saveWineRegion) {
+            val wineRegion = when (val r = newWine.region) {
+                is NewRegion      -> regionService.createRegion(r, userId)
+                is ExistingRegion -> regionService.getRegion(r.id, userId)
+                    .switchIfEmpty(Mono.error(ObjectNotFoundException("Wine region with id '${r.id}' not found for user $userId.")))
+            }
+            return wineRegion.flatMap { region ->
                 winery.flatMap {
-                    wineRepository.save(entityFactory.newWine(wineName, wineType, it.ID, region.ID))
+                    wineRepository.save(entityFactory.newWine(newWine.name, newWine.type, it.ID, region.ID, userId))
                 }
             }
-                              )
+        } else {
+            return winery.flatMap {
+                wineRepository.save(entityFactory.newWine(newWine.name, newWine.type, it.ID, it.regionId, userId))
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ class UserRepositoryIT : WordSpecIT() {
 
         "findById" should {
             "return the correct user when it exists" {
-                repository.findById(dataSet.theChosenOne.ID).block() shouldBe dataSet.theChosenOne
+                repository.findById(dataSet.userOne.ID).block() shouldBe dataSet.userOne
             }
 
             "return null when the user doesn't exists" {
@@ -29,7 +29,7 @@ class UserRepositoryIT : WordSpecIT() {
 
         "findByLogin" should {
             "return the correct user when it exists" {
-                repository.findByLogin(dataSet.theChosenOne.login).block() shouldBe dataSet.theChosenOne
+                repository.findByLogin(dataSet.userOne.login).block() shouldBe dataSet.userOne
             }
 
             "return null when the user doesn't exists" {
@@ -45,16 +45,16 @@ class UserRepositoryIT : WordSpecIT() {
             }
 
             "update an existing user" {
-                val updatedUser = dataSet.theChosenOne.copy(passwordHash = "P@sSw0rD")
+                val updatedUser = dataSet.userOne.copy(passwordHash = "P@sSw0rD")
                 val res = repository.save(updatedUser).block()!!
                 res shouldBe updatedUser
             }
 
             "fail properly when trying to save a user with the same login as an already existing user" {
                 val exception = shouldThrow<DataIntegrityViolationException> {
-                    repository.save(dataSet.theChosenOne.copy(passwordHash = "password", isNew = true)).block()!!
+                    repository.save(dataSet.userOne.copy(passwordHash = "password", isNew = true)).block()!!
                 }
-                exception should haveMessage("User with login '${dataSet.theChosenOne.login}' already exists.")
+                exception should haveMessage("User with login '${dataSet.userOne.login}' already exists.")
             }
         }
 

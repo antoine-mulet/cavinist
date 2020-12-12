@@ -4,6 +4,7 @@ import com.amulet.cavinist.persistence.data.user.UserEntity
 import com.amulet.cavinist.persistence.data.wine.*
 import com.amulet.cavinist.persistence.repository.user.UserRepository
 import com.amulet.cavinist.persistence.repository.wine.*
+import com.amulet.cavinist.security.JwtUtils
 import org.springframework.stereotype.Component
 import java.util.UUID
 
@@ -12,11 +13,20 @@ class InitialTestDataSet(
     userRepository: UserRepository,
     wineRepository: WineRepository,
     wineryRepository: WineryRepository,
-    regionRepository: RegionRepository) {
+    regionRepository: RegionRepository,
+    jwtUtils: JwtUtils) {
 
-    val theChosenOne: UserEntity by lazy {
-        userRepository.findById(UUID.fromString("eb7d367f-d0a6-4906-8584-43bc8b9f5cad")).block()!!
+    val userOneId: UUID = UUID.fromString("eb7d367f-d0a6-4906-8584-43bc8b9f5cad")
+    val userOne: UserEntity by lazy {
+        userRepository.findById(userOneId).block()!!
     }
+    val userOneJwt: String by lazy { jwtUtils.issueJwtForUser(userOneId) }
+
+    val userTwoId: UUID = UUID.fromString("c9bff611-1206-4661-924d-5e86f551f430")
+    val userTwo: UserEntity by lazy {
+        userRepository.findById(userTwoId).block()!!
+    }
+    val userTwoJwt: String by lazy { jwtUtils.issueJwtForUser(userTwoId) }
 
     val pomerolRegion: RegionEntity by lazy {
         regionRepository.findById(UUID.fromString("2e744843-bf6a-4914-80fd-a802b5a952cb")).block()!!

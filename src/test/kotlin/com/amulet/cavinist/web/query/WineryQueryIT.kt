@@ -16,7 +16,7 @@ class WineryQueryIT : WordSpecWebIT() {
                 { id: UUID -> """query { $getWineryQuery(id: "$id") {id, version, name, region { id, version, name, country } } }""" }
 
             "return the correct winery" {
-                testQuery(getWineryQuery, query(dataSet.petrusWinery.ID)).verifyData(
+                testQuery(getWineryQuery, query(dataSet.petrusWinery.ID), dataSet.userOneJwt).verifyData(
                     "id" to dataSet.petrusWinery.id.toString(),
                     "version" to dataSet.petrusWinery.version(),
                     "name" to dataSet.petrusWinery.name,
@@ -27,7 +27,7 @@ class WineryQueryIT : WordSpecWebIT() {
             }
 
             "return null if the winery does not exist" {
-                testQuery(getWineryQuery, query(UUID.randomUUID())).verifyEmpty()
+                testQuery(getWineryQuery, query(UUID.randomUUID()), dataSet.userOneJwt).verifyEmpty()
             }
         }
 
@@ -36,7 +36,7 @@ class WineryQueryIT : WordSpecWebIT() {
             val query = "query { $listWineriesQuery {id, version, name, region { id, version, name, country } } }"
 
             "return the list of all the wineries" {
-                testQuery(listWineriesQuery, query).verifyArraySize(2)
+                testQuery(listWineriesQuery, query, dataSet.userOneJwt).verifyArraySize(2)
             }
         }
     }

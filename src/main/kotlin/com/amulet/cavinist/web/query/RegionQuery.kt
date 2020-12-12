@@ -1,6 +1,7 @@
 package com.amulet.cavinist.web.query
 
 import com.amulet.cavinist.service.wine.RegionService
+import com.amulet.cavinist.utils.suspending
 import com.amulet.cavinist.web.graphql.RequestContext
 import com.amulet.cavinist.web.data.output.wine.RegionOutput
 import com.expediagroup.graphql.spring.operations.Query
@@ -11,8 +12,8 @@ import java.util.UUID
 class RegionQuery(private val regionService: RegionService) : Query {
 
     suspend fun getRegion(context: RequestContext, id: UUID): RegionOutput? =
-        regionService.getRegion(id)?.let { RegionOutput(it) }
+        regionService.getRegion(id, context.userId()).map { region -> RegionOutput(region) }.suspending()
 
     suspend fun listRegions(context: RequestContext): List<RegionOutput> =
-        regionService.listRegions().map { RegionOutput(it) }
+        regionService.listRegions(context.userId()).map { RegionOutput(it) }.suspending()
 }

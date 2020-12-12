@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component
 class RequestContextFactory(val jwtUtils: JwtUtils) : GraphQLContextFactory<RequestContext> {
 
     override suspend fun generateContext(request: ServerHttpRequest, response: ServerHttpResponse): RequestContext {
-        val bearer = request.headers.getFirst("Bearer")
+        val authHeader = request.headers.getFirst("Authorization")
+        val bearer = authHeader?.substringAfter("Bearer ")
         val maybeUserId = bearer?.let {
             when (val jwt = jwtUtils.decodeJwt(it)) {
                 is JwtUtils.Companion.JwtDecodeResult.ValidJwt -> jwt.userId

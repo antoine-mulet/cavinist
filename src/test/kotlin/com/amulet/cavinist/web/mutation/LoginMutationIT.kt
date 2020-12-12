@@ -16,10 +16,10 @@ class LoginMutationIT : WordSpecWebIT() {
 
                 testQuery(
                     loginMutation,
-                    """mutation { login(login: "${dataSet.theChosenOne.login}", password: "Th!sIs@Saf3PwdToHash") { user { id, login}, token }}""")
+                    """mutation { login(login: "${dataSet.userOne.login}", password: "Th!sIs@Saf3PwdToHash") { user { id, login}, token }}""")
                     .verifyData(
-                        "user.id" to dataSet.theChosenOne.id.toString(),
-                        "user.login" to dataSet.theChosenOne.login,
+                        "user.id" to dataSet.userOne.id.toString(),
+                        "user.login" to dataSet.userOne.login,
                         "token" to StringStartsWith("ey"))
 
             }
@@ -37,7 +37,7 @@ class LoginMutationIT : WordSpecWebIT() {
 
                 testQuery(
                     loginMutation,
-                    """mutation { login(login: "${dataSet.theChosenOne.login}", password: "Th!sIs@Saf3PwdToHashh") { user { id, login}, token }}""")
+                    """mutation { login(login: "${dataSet.userOne.login}", password: "Th!sIs@Saf3PwdToHashh") { user { id, login}, token }}""")
                     .verifyError(ErrorCode.AUTH_FAILURE, "Login or password is incorrect.")
 
             }

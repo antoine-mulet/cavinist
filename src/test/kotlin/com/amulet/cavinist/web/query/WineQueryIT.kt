@@ -27,7 +27,7 @@ class WineQueryIT : WordSpecWebIT() {
             }
 
             "return the correct wine" {
-                testQuery(getWineQuery, query(dataSet.petrusWine.ID)).verifyData(
+                testQuery(getWineQuery, query(dataSet.petrusWine.ID), dataSet.userOneJwt).verifyData(
                     "id" to dataSet.petrusWine.id.toString(),
                     "version" to dataSet.petrusWine.version(),
                     "name" to dataSet.petrusWine.name,
@@ -45,7 +45,7 @@ class WineQueryIT : WordSpecWebIT() {
             }
 
             "return null if the wine does not exist" {
-                testQuery(getWineQuery, query(UUID.randomUUID())).verifyEmpty()
+                testQuery(getWineQuery, query(UUID.randomUUID()), dataSet.userOneJwt).verifyEmpty()
             }
         }
 
@@ -64,7 +64,7 @@ class WineQueryIT : WordSpecWebIT() {
                 }""".trimIndent()
 
             "return the list of all the wines" {
-                testQuery(listWinesQuery, query).verifyArraySize(3)
+                testQuery(listWinesQuery, query, dataSet.userOneJwt).verifyArraySize(3)
             }
         }
     }

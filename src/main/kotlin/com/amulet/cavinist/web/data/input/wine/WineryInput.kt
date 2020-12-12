@@ -1,27 +1,18 @@
 package com.amulet.cavinist.web.data.input.wine
 
+import com.amulet.cavinist.service.wine.*
 import com.amulet.cavinist.web.data.input.InvalidInputDataException
-import com.expediagroup.graphql.annotations.*
+import com.expediagroup.graphql.annotations.GraphQLDescription
 import java.util.UUID
 
-@GraphQLName("WineryInput")
 @GraphQLDescription("Polymorphic type that can represent an existing winery when setting the `id` attribute or a new winery when setting the other attributes")
-data class PolymorphicWineryInput(
-    val id: UUID?,
-    val name: String?,
-    val regionInput: PolymorphicRegionInput?) {
+data class WineryInput(val id: UUID?, val name: String?, val regionInput: RegionInput?) {
 
-    fun toWineryInput(): WineryInput {
+    fun toWinery(): Winery {
         return if (id != null && name == null && regionInput == null)
-            ExistingWineryInput(id)
+            ExistingWinery(id)
         else if (id == null && name != null && regionInput != null)
-            NewWineryInput(name, regionInput.toRegionInput())
+            NewWinery(name, regionInput.toRegion())
         else throw InvalidInputDataException("`id` only is required for an existing winery, `name` and `regionInput` are required to create a new winery.")
     }
 }
-
-sealed class WineryInput
-
-data class NewWineryInput(val name: String, val regionInput: RegionInput) : WineryInput()
-
-data class ExistingWineryInput(val id: UUID) : WineryInput()
