@@ -5,7 +5,7 @@ import com.amulet.cavinist.persistence.data.wine.*
 import com.amulet.cavinist.persistence.repository.CrudRepository
 import com.amulet.cavinist.persistence.repository.wine.crud.CrudWineryRepository
 import org.intellij.lang.annotations.Language
-import org.springframework.data.r2dbc.core.DatabaseClient
+import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.*
 import java.util.UUID
@@ -27,7 +27,7 @@ class WineryRepository(private val databaseClient: DatabaseClient, override val 
             WHERE winery.user_id='$userId'""".trimIndent()
 
     fun findAllForUser(userId: UUID): Flux<WineryWithDependencies> {
-        return databaseClient.execute(query(userId))
+        return databaseClient.sql(query(userId))
             .map { row ->
                 WineryWithDependencies(
                     row.getUUID("winery_id"),

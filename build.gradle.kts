@@ -2,8 +2,8 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val springBootVersion = "2.3.0.RELEASE"
-    val kotlinVersion = "1.3.71"
+    val springBootVersion = "2.4.1"
+    val kotlinVersion = "1.4.20"
     id("org.springframework.boot") version springBootVersion
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -28,14 +28,13 @@ repositories {
     maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-val graphqlVersion = "2.1.1"
-val bouncyCastleVersion = "1.65"
+val graphqlVersion = "3.6.8"
+val bouncyCastleVersion = "1.67"
 val passayVersion = "1.6.0"
-val jjwtVersion = "0.11.1"
+val jjwtVersion = "0.11.2"
 
-val kotestVersion = "4.0.5"
-val mockkVersion = "1.10.0"
-val springMockkVersion = "2.0.1"
+val kotestVersion = "4.3.1"
+val springMockkVersion = "3.0.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -50,7 +49,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("com.expediagroup:graphql-kotlin-schema-generator:$graphqlVersion")
     implementation("com.expediagroup:graphql-kotlin-spring-server:$graphqlVersion")
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
@@ -66,7 +64,6 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
     testImplementation("io.kotest:kotest-extensions-spring:$kotestVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.ninja-squad:springmockk:$springMockkVersion")
 }
 

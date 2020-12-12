@@ -2,7 +2,7 @@ package com.amulet.cavinist.service
 
 import io.r2dbc.spi.ConnectionFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
+import org.springframework.r2dbc.connection.R2dbcTransactionManager
 import org.springframework.stereotype.Component
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.reactive.TransactionalOperator

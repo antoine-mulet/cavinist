@@ -5,7 +5,7 @@ import io.r2dbc.spi.ConnectionFactory
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
-import org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager
+import org.springframework.r2dbc.connection.R2dbcTransactionManager
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 import org.springframework.transaction.ReactiveTransactionManager
