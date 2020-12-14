@@ -10,14 +10,14 @@ Why wine? just because I like wine :)
 
 ## Technologies
 + Language: [Kotlin](https://kotlinlang.org/)
-+ Framework: [Spring Boot](https://spring.io/projects/spring-boot)
 + Build tool: [Gradle](https://gradle.org/)
-+ Database: [PostgreSQL](https://www.postgresql.org/) 
++ Framework: [Spring Boot](https://spring.io/projects/spring-boot)
++ Database: [PostgreSQL](https://www.postgresql.org/), [Flyway](https://flywaydb.org/)
 + Libraries: [GraphQL Kotlin](https://github.com/ExpediaGroup/graphql-kotlin), 
   [Spring Data R2DBC](https://github.com/spring-projects/spring-data-r2dbc),
   [BouncyCastle](https://www.bouncycastle.org/),
   [Java JWT](https://github.com/jwtk/jjwt),
-  [Passay](https://www.passay.org/),
-  [Kotest](https://kotest.io/),
+  [Passay](https://www.passay.org/)
++ Testing: [Kotest](https://kotest.io/),
   [MockK](https://mockk.io/) via [SpringMockK](https://github.com/Ninja-Squad/springmockk)
   
