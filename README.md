@@ -1,4 +1,6 @@
 # Cavinist
+[![Build](https://github.com/antoine-mulet/cavinist/workflows/CI/badge.svg)](https://github.com/antoine-mulet/cavinist/actions?query=workflow%3A%22CI%22)
+
 Wine cellar management API.
 
 ## What is this project?
