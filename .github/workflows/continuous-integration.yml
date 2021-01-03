@@ -34,3 +34,9 @@ jobs:
           java-version: 11
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Generate code coverage report with Jacoco
+        run: ./gradlew jacocoTestReport
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+         file: ./build/reports/jacoco/test/jacocoTestReport.xml
