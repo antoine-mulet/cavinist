@@ -1,5 +1,6 @@
 # Cavinist
 [![Build](https://github.com/antoine-mulet/cavinist/workflows/CI/badge.svg)](https://github.com/antoine-mulet/cavinist/actions?query=workflow%3A%22CI%22)
+[![codecov](https://codecov.io/gh/antoine-mulet/cavinist/branch/master/graph/badge.svg?token=GDFUH1IATH)](https://codecov.io/gh/antoine-mulet/cavinist)
 
 Wine cellar management API.
 
