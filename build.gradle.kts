@@ -8,6 +8,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("kapt") version kotlinVersion
+    jacoco
 }
 
 // Using spring dependency management coming from spring boot - see https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/html/#managing-dependencies-using-in-isolation
@@ -35,6 +36,7 @@ val jjwtVersion = "0.11.2"
 
 val kotestVersion = "4.3.1"
 val springMockkVersion = "3.0.0"
+val jacocoVersion = "0.8.6"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -75,6 +77,16 @@ kapt {
     }
 }
 
+jacoco {
+    toolVersion = jacocoVersion
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
+    }
+}
+
 tasks.withType<Test> {
     description = "Runs all the tests."
     useJUnitPlatform()
@@ -87,6 +99,9 @@ tasks.register<Test>("ut") {
     filter {
         includeTestsMatching("*Tests")
     }
+    configure<JacocoTaskExtension> {
+        isEnabled = false
+    }
 }
 
 tasks.register<Test>("it") {
@@ -94,6 +109,9 @@ tasks.register<Test>("it") {
     description = "Runs the integration tests only."
     filter {
         includeTestsMatching("*IT")
+    }
+    configure<JacocoTaskExtension> {
+        isEnabled = false
     }
 }
 
