@@ -2,8 +2,9 @@ package com.amulet.cavinist.persistence.repository.wine
 
 import com.amulet.cavinist.persistence.*
 import com.amulet.cavinist.persistence.data.wine.*
-import com.amulet.cavinist.persistence.repository.CrudRepository
+import com.amulet.cavinist.persistence.repository.CrudCoroutineRepository
 import com.amulet.cavinist.persistence.repository.wine.crud.CrudWineRepository
+import kotlinx.coroutines.reactive.awaitSingle
 import org.intellij.lang.annotations.Language
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
@@ -12,9 +13,9 @@ import java.util.UUID
 
 @Repository
 class WineRepository(private val databaseClient: DatabaseClient, override val crudRepository: CrudWineRepository) :
-    CrudRepository<WineEntity>() {
+    CrudCoroutineRepository<WineEntity>() {
 
-    fun findForUser(id: UUID, userId: UUID): Mono<WineEntity> = crudRepository.findByIdAndUserId(id, userId)
+    suspend fun findForUser(id: UUID, userId: UUID): WineEntity? = crudRepository.findByIdAndUserId(id, userId)
 
     @Language("SQL")
     private fun query(userId: UUID) =
@@ -33,7 +34,7 @@ class WineRepository(private val databaseClient: DatabaseClient, override val cr
                 INNER JOIN regions as wine_region ON wine.region_id = wine_region.id
             WHERE wine.user_id='$userId'""".trimIndent()
 
-    fun findAllForUser(userId: UUID): Flux<WineWithDependencies> {
+    suspend fun findAllForUser(userId: UUID): List<WineWithDependencies> {
         return databaseClient.sql(query(userId))
             .map { row ->
                 WineWithDependencies(
@@ -50,14 +51,20 @@ class WineRepository(private val databaseClient: DatabaseClient, override val cr
                             row.getInt("winery_region_version"),
                             row.getString("winery_region_name"),
                             row.getString("winery_region_country"),
-                            row.getUUID("winery_region_user_id"))),
+                            row.getUUID("winery_region_user_id")
+                        )
+                    ),
                     RegionEntity(
                         row.getUUID("wine_region_id"),
                         row.getInt("wine_region_version"),
                         row.getString("wine_region_name"),
                         row.getString("wine_region_country"),
-                        row.getUUID("wine_region_user_id")))
+                        row.getUUID("wine_region_user_id")
+                    )
+                )
             }
             .all()
+            .collectList()
+            .awaitSingle()
     }
 }

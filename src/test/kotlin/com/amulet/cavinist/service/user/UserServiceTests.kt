@@ -1,15 +1,20 @@
 package com.amulet.cavinist.service.user
 
 import com.amulet.cavinist.common.WordSpecUnitTests
-import com.amulet.cavinist.persistence.data.user.*
+import com.amulet.cavinist.persistence.data.user.UserEntity
+import com.amulet.cavinist.persistence.data.user.UserEntityFactory
 import com.amulet.cavinist.persistence.repository.user.UserRepository
 import com.amulet.cavinist.security.PasswordUtils
-import com.amulet.cavinist.security.PasswordUtils.Companion.LoginPasswordValidationResult.*
+import com.amulet.cavinist.security.PasswordUtils.Companion.LoginPasswordValidationResult.LoginPolicyFailure
+import com.amulet.cavinist.security.PasswordUtils.Companion.LoginPasswordValidationResult.PasswordPolicyFailure
+import com.amulet.cavinist.security.PasswordUtils.Companion.LoginPasswordValidationResult.ValidLoginPassword
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.*
 import io.kotest.matchers.nulls.beNull
-import io.mockk.*
-import reactor.core.publisher.Mono
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import java.util.UUID
 
 class UserServiceTests : WordSpecUnitTests() {
@@ -27,12 +32,12 @@ class UserServiceTests : WordSpecUnitTests() {
 
             "return the correct user from the repository" {
                 val user = UserEntity(userId, "login", "password")
-                every { userRepository.findById(userId) } returns Mono.just(user)
+                coEvery { userRepository.findById(userId) } returns user
                 service.getUserById(userId) shouldBe user
             }
 
             "return null when the user doesn't exist" {
-                every { userRepository.findById(userId) } returns Mono.empty()
+                coEvery { userRepository.findById(userId) } returns null
                 service.getUserById(userId) should beNull()
             }
         }
@@ -43,12 +48,12 @@ class UserServiceTests : WordSpecUnitTests() {
 
             "return the correct user from the repository" {
                 val user = UserEntity(userId, "login", "password")
-                every { userRepository.findByLogin("login") } returns Mono.just(user)
+                coEvery { userRepository.findByLogin("login") } returns user
                 service.getUserByLogin("login") shouldBe user
             }
 
             "return null when the user doesn't exist" {
-                every { userRepository.findByLogin("login") } returns Mono.empty()
+                coEvery { userRepository.findByLogin("login") } returns null
                 service.getUserByLogin("login") should beNull()
             }
         }
@@ -65,7 +70,7 @@ class UserServiceTests : WordSpecUnitTests() {
                 every { passwordHashUtils.validateLoginPassword(login, password) } returns ValidLoginPassword
                 every { passwordHashUtils.hashPassword(password) } returns passwordHash
                 every { entityFactory.newUser(login, passwordHash) } returns newUser
-                every { userRepository.save(newUser) } returns Mono.just(expectedUser)
+                coEvery { userRepository.save(newUser) } returns expectedUser
                 service.createUser(login, password) shouldBe expectedUser
             }
 

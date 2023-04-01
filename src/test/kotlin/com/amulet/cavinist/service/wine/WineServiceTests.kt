@@ -1,15 +1,24 @@
 package com.amulet.cavinist.service.wine
 
 import com.amulet.cavinist.common.WordSpecUnitTests
-import com.amulet.cavinist.persistence.data.wine.*
+import com.amulet.cavinist.persistence.data.wine.RegionEntity
+import com.amulet.cavinist.persistence.data.wine.WineEntity
+import com.amulet.cavinist.persistence.data.wine.WineEntityFactory
+import com.amulet.cavinist.persistence.data.wine.WineType
+import com.amulet.cavinist.persistence.data.wine.WineWithDependencies
+import com.amulet.cavinist.persistence.data.wine.WineryEntity
+import com.amulet.cavinist.persistence.data.wine.WineryWithDependencies
 import com.amulet.cavinist.persistence.repository.wine.WineRepository
-import com.amulet.cavinist.service.*
-import com.amulet.cavinist.utils.suspending
+import com.amulet.cavinist.service.ObjectNotFoundException
+import com.amulet.cavinist.service.TxManager
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
-import io.mockk.*
-import reactor.core.publisher.*
+import io.mockk.coEvery
+import io.mockk.coInvoke
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import java.util.UUID
 
 class WineServiceTests : WordSpecUnitTests() {
@@ -24,7 +33,11 @@ class WineServiceTests : WordSpecUnitTests() {
 
     init {
 
-        every { transactionManager.newTx(any<Mono<WineEntity>>()) } answers { firstArg() }
+        coEvery {
+            transactionManager.newTx(captureCoroutine<suspend () -> WineEntity>())
+        } answers {
+            coroutine<suspend () -> WineEntity>().coInvoke()
+        }
 
         "getWine" should {
 
@@ -32,8 +45,8 @@ class WineServiceTests : WordSpecUnitTests() {
                 val id = UUID.randomUUID()
                 val userId = UUID.randomUUID()
                 val expected = WineEntity(id, 0, "wine", WineType.WHITE, UUID.randomUUID(), UUID.randomUUID(), userId)
-                every { wineRepository.findForUser(id, userId) } returns Mono.just(expected)
-                service.getWine(id, userId).suspending() shouldBe expected
+                coEvery { wineRepository.findForUser(id, userId) } returns expected
+                service.findWine(id, userId) shouldBe expected
             }
         }
 
@@ -56,16 +69,19 @@ class WineServiceTests : WordSpecUnitTests() {
                         wineEntity1.name,
                         wineEntity1.type,
                         wineryWithDependencies,
-                        regionEntity),
+                        regionEntity
+                    ),
                     WineWithDependencies(
                         wineEntity2.ID,
                         0,
                         wineEntity2.name,
                         wineEntity2.type,
                         wineryWithDependencies,
-                        regionEntity))
-                every { wineRepository.findAllForUser(userId) } returns Flux.fromIterable(expectedList)
-                service.listWines(userId).suspending() shouldBe expectedList
+                        regionEntity
+                    )
+                )
+                coEvery { wineRepository.findAllForUser(userId) } returns expectedList
+                service.listWines(userId) shouldBe expectedList
             }
         }
 
@@ -76,20 +92,21 @@ class WineServiceTests : WordSpecUnitTests() {
             "save a new wine referencing existing winery and region" {
                 val regionId = UUID.randomUUID()
                 val regionEntity = RegionEntity(regionId, 0, "region", "country", userId)
-                every { regionService.getRegion(regionId, userId) } returns Mono.just(regionEntity)
+                coEvery { regionService.getRegion(regionId, userId) } returns regionEntity
                 val wineryId = UUID.randomUUID()
                 val wineryEntity = WineryEntity(wineryId, 0, "winery", regionId, userId)
-                every { wineryService.getWinery(wineryId, userId) } returns Mono.just(wineryEntity)
+                coEvery { wineryService.getWinery(wineryId, userId) } returns wineryEntity
                 val wineId = UUID.randomUUID()
                 val wine = WineEntity(wineId, null, "New Wine", WineType.ROSE, wineryId, regionId, userId)
                 every { entityFactory.newWine("New Wine", WineType.ROSE, wineryId, regionId, userId) } returns wine
-                every { wineRepository.save(wine) } returns Mono.just(wine.copy(version = 0))
+                coEvery { wineRepository.save(wine) } returns wine.copy(version = 0)
                 val res = service.createWine(
-                    NewWine("New Wine", WineType.ROSE, ExistingWinery(wineryId), ExistingRegion(regionId)), userId)
-                    .suspending()
+                    NewWine("New Wine", WineType.ROSE, ExistingWinery(wineryId), ExistingRegion(regionId)), userId
+                )
+
                 res shouldBe wine.copy(version = 0)
 
-                verify(exactly = 1) { transactionManager.newTx(any<Mono<WineEntity>>()) }
+                coVerify(exactly = 1) { transactionManager.newTx(any<suspend () -> WineEntity>()) }
             }
 
             "save a new wine along with its winery and region" {
@@ -105,19 +122,21 @@ class WineServiceTests : WordSpecUnitTests() {
                 val wineId = UUID.randomUUID()
                 val wine = WineEntity(wineId, null, "New Wine", WineType.ROSE, wineryId, wineRegionId, userId)
                 every { entityFactory.newWine("New Wine", WineType.ROSE, wineryId, wineRegionId, userId) } returns wine
-                every { wineRepository.save(wine) } returns Mono.just(wine.copy(version = 0))
-                every { regionService.createRegion(newWineRegion, userId) } returns Mono.just(wineRegionEntity)
-                every { regionService.createRegion(newWineryRegion, userId) } returns Mono.just(wineryRegionEntity)
-                every { wineryService.createWinery(newWinery, userId) } returns Mono.just(wineryEntity)
+                coEvery { wineRepository.save(wine) } returns wine.copy(version = 0)
+                coEvery { regionService.createRegion(newWineRegion, userId) } returns wineRegionEntity
+                coEvery { regionService.createRegion(newWineryRegion, userId) } returns wineryRegionEntity
+                coEvery { wineryService.createWinery(newWinery, userId) } returns wineryEntity
                 val res = service.createWine(
                     NewWine(
                         "New Wine",
                         WineType.ROSE,
                         NewWinery("winery", NewRegion("winery_region", "country")),
-                        NewRegion("wine_region", "country")), userId).suspending()
+                        NewRegion("wine_region", "country")
+                    ), userId
+                )
                 res shouldBe wine.copy(version = 0)
 
-                verify(exactly = 1) { transactionManager.newTx(any<Mono<WineEntity>>()) }
+                coVerify(exactly = 1) { transactionManager.newTx(any<suspend () -> WineEntity>()) }
             }
 
             "save a new wine along with its winery and region when the wine and winery regions are the same" {
@@ -130,18 +149,20 @@ class WineServiceTests : WordSpecUnitTests() {
                 val wineId = UUID.randomUUID()
                 val wine = WineEntity(wineId, null, "New Wine", WineType.ROSE, wineryId, regionId, userId)
                 every { entityFactory.newWine("New Wine", WineType.ROSE, wineryId, regionId, userId) } returns wine
-                every { wineRepository.save(wine) } returns Mono.just(wine.copy(version = 0))
-                every { regionService.createRegion(newRegion, userId) } returns Mono.just(regionEntity)
-                every { wineryService.createWinery(newWinery, userId) } returns Mono.just(wineryEntity)
+                coEvery { wineRepository.save(wine) } returns wine.copy(version = 0)
+                coEvery { regionService.createRegion(newRegion, userId) } returns regionEntity
+                coEvery { wineryService.createWinery(newWinery, userId) } returns wineryEntity
                 val res = service.createWine(
                     NewWine(
                         "New Wine",
                         WineType.ROSE,
                         NewWinery("winery", NewRegion("region", "country")),
-                        NewRegion("region", "country")), userId).suspending()
+                        NewRegion("region", "country")
+                    ), userId
+                )
                 res shouldBe wine.copy(version = 0)
 
-                verify(exactly = 1) { transactionManager.newTx(any<Mono<WineEntity>>()) }
+                coVerify(exactly = 1) { transactionManager.newTx(any<suspend () -> WineEntity>()) }
             }
 
             "fail if a reference cannot be found" {
@@ -150,27 +171,35 @@ class WineServiceTests : WordSpecUnitTests() {
                 val wineryRegionId = UUID.randomUUID()
                 val wineryId = UUID.randomUUID()
                 val winery = WineryEntity(wineryId, 0, "winery", wineryRegionId, userId)
-                every { regionService.getRegion(wineRegionId, userId) } returns Mono.empty()
-                every { wineryService.getWinery(wineryId, userId) } returns Mono.just(winery)
+                coEvery { regionService.getRegion(wineRegionId, userId) } throws ObjectNotFoundException(
+                    "Wine region with id '$wineRegionId' not found for user $userId."
+                )
+                coEvery { wineryService.getWinery(wineryId, userId) } returns winery
                 val exception1 = shouldThrow<ObjectNotFoundException> {
                     service.createWine(
                         NewWine(
                             "New Wine",
                             WineType.ROSE,
                             ExistingWinery(wineryId),
-                            ExistingRegion(wineRegionId)), userId).suspending()
+                            ExistingRegion(wineRegionId)
+                        ), userId
+                    )
                 }
                 exception1 shouldHaveMessage "Wine region with id '$wineRegionId' not found for user $userId."
 
-                every { regionService.getRegion(wineRegionId, userId) } returns Mono.just(wineRegion)
-                every { wineryService.getWinery(wineryId, userId) } returns Mono.empty()
+                coEvery { regionService.getRegion(wineRegionId, userId) } returns wineRegion
+                coEvery { wineryService.getWinery(wineryId, userId) } throws ObjectNotFoundException(
+                    "Winery with id '$wineryId' not found."
+                )
                 val exception2 = shouldThrow<ObjectNotFoundException> {
                     service.createWine(
                         NewWine(
                             "New Wine",
                             WineType.ROSE,
                             ExistingWinery(wineryId),
-                            ExistingRegion(wineRegionId)), userId).suspending()
+                            ExistingRegion(wineRegionId)
+                        ), userId
+                    )
                 }
                 exception2 shouldHaveMessage "Winery with id '$wineryId' not found."
             }

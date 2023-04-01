@@ -4,8 +4,10 @@ import com.amulet.cavinist.common.WordSpecIT
 import com.amulet.cavinist.persistence.data.user.UserEntity
 import com.amulet.cavinist.persistence.repository.user.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.*
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.haveMessage
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import java.util.UUID
@@ -19,40 +21,39 @@ class UserRepositoryIT : WordSpecIT() {
 
         "findById" should {
             "return the correct user when it exists" {
-                repository.findById(dataSet.userOne.ID).block() shouldBe dataSet.userOne
+                runBlocking { repository.findById(dataSet.userOne.ID) } shouldBe dataSet.userOne
             }
 
             "return null when the user doesn't exists" {
-                repository.findById(UUID.randomUUID()).block() shouldBe null
+                runBlocking { repository.findById(UUID.randomUUID()) } shouldBe null
             }
         }
 
         "findByLogin" should {
             "return the correct user when it exists" {
-                repository.findByLogin(dataSet.userOne.login).block() shouldBe dataSet.userOne
+                runBlocking { repository.findByLogin(dataSet.userOne.login) } shouldBe dataSet.userOne
             }
 
             "return null when the user doesn't exists" {
-                repository.findByLogin("unknown").block() shouldBe null
+                runBlocking { repository.findByLogin("unknown") } shouldBe null
             }
         }
 
         "save" should {
             "save a new user" {
                 val newUser = UserEntity(UUID.randomUUID(), "login", "password", true)
-                val res = repository.save(newUser).block()!!
-                repository.findById(res.ID).block() shouldBe newUser.copy(isNew = false)
+                val res = runBlocking { repository.save(newUser) }
+                runBlocking { repository.findById(res.ID) } shouldBe newUser.copy(isNew = false)
             }
 
             "update an existing user" {
                 val updatedUser = dataSet.userOne.copy(passwordHash = "P@sSw0rD")
-                val res = repository.save(updatedUser).block()!!
-                res shouldBe updatedUser
+                runBlocking { repository.save(updatedUser) } shouldBe updatedUser
             }
 
             "fail properly when trying to save a user with the same login as an already existing user" {
                 val exception = shouldThrow<DataIntegrityViolationException> {
-                    repository.save(dataSet.userOne.copy(passwordHash = "password", isNew = true)).block()!!
+                    runBlocking { repository.save(dataSet.userOne.copy(passwordHash = "password", isNew = true)) }
                 }
                 exception should haveMessage("User with login '${dataSet.userOne.login}' already exists.")
             }

@@ -1,12 +1,11 @@
 package com.amulet.cavinist.persistence.repository.user
 
 import com.amulet.cavinist.persistence.data.user.UserEntity
-import com.amulet.cavinist.persistence.repository.CrudRepository
+import com.amulet.cavinist.persistence.repository.CrudCoroutineRepository
 import org.springframework.stereotype.Repository
-import reactor.core.publisher.Mono
 
 @Repository
-class UserRepository(override val crudRepository: CrudUserRepository) : CrudRepository<UserEntity>() {
+class UserRepository(override val crudRepository: CrudUserRepository) : CrudCoroutineRepository<UserEntity>() {
 
-    fun findByLogin(login: String): Mono<UserEntity> = crudRepository.findByLogin(login)
+    suspend fun findByLogin(login: String): UserEntity? = crudRepository.findByLogin(login)
 }

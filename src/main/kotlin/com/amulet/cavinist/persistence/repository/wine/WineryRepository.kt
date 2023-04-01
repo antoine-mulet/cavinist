@@ -2,8 +2,9 @@ package com.amulet.cavinist.persistence.repository.wine
 
 import com.amulet.cavinist.persistence.*
 import com.amulet.cavinist.persistence.data.wine.*
-import com.amulet.cavinist.persistence.repository.CrudRepository
+import com.amulet.cavinist.persistence.repository.CrudCoroutineRepository
 import com.amulet.cavinist.persistence.repository.wine.crud.CrudWineryRepository
+import kotlinx.coroutines.reactive.awaitSingle
 import org.intellij.lang.annotations.Language
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
@@ -12,9 +13,9 @@ import java.util.UUID
 
 @Repository
 class WineryRepository(private val databaseClient: DatabaseClient, override val crudRepository: CrudWineryRepository) :
-    CrudRepository<WineryEntity>() {
+    CrudCoroutineRepository<WineryEntity>() {
 
-    fun findForUser(id: UUID, userId: UUID): Mono<WineryEntity> = crudRepository.findByIdAndUserId(id, userId)
+    suspend fun findForUser(id: UUID, userId: UUID): WineryEntity? = crudRepository.findByIdAndUserId(id, userId)
 
     @Language("SQL")
     private fun query(userId: UUID) =
@@ -26,7 +27,7 @@ class WineryRepository(private val databaseClient: DatabaseClient, override val 
                 INNER JOIN regions as winery_region ON winery.region_id = winery_region.id
             WHERE winery.user_id='$userId'""".trimIndent()
 
-    fun findAllForUser(userId: UUID): Flux<WineryWithDependencies> {
+    suspend fun findAllForUser(userId: UUID): List<WineryWithDependencies> {
         return databaseClient.sql(query(userId))
             .map { row ->
                 WineryWithDependencies(
@@ -38,9 +39,13 @@ class WineryRepository(private val databaseClient: DatabaseClient, override val 
                         row.getInt("winery_region_version"),
                         row.getString("winery_region_name"),
                         row.getString("winery_region_country"),
-                        row.getUUID("winery_region_user_id")))
+                        row.getUUID("winery_region_user_id")
+                    )
+                )
             }
             .all()
+            .collectList()
+            .awaitSingle()
     }
 
 }
